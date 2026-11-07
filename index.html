@@ -1,409 +1,721 @@
-
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Гонки — Таблица умножения</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
-@keyframes cloudDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(16px)}}
-@keyframes cloudDrift2{0%,100%{transform:translateX(0)}50%{transform:translateX(-18px)}}
-@keyframes smokeRise{0%{transform:translateY(0) scale(.5);opacity:.8}100%{transform:translateY(-45px) scale(2);opacity:0}}
-@keyframes wheelSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-@keyframes fallDown{from{transform:translateX(-50%) translateY(-90px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
-@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
-@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(200px) rotate(720deg);opacity:0}}
-@keyframes starPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
-@keyframes glow{0%,100%{box-shadow:0 0 0 4px #4CAF50}50%{box-shadow:0 0 0 8px #4CAF50,0 0 20px #4CAF5099}}
-@keyframes bob{0%,100%{transform:translateY(0px)}50%{transform:translateY(-4px)}}
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;800;900&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+button{touch-action:manipulation;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Nunito',sans-serif;background:#87CEEB;min-height:100vh;overflow-x:hidden;user-select:none;}
 
-#game{
-  font-family:'Comic Sans MS','Segoe UI Rounded','Segoe UI',sans-serif;
-  height:620px;position:relative;overflow:hidden;border-radius:16px;
-  background:linear-gradient(180deg,#4FC3F7 0%,#81D4FA 30%,#B3E5FC 50%,#C8E6C9 65%,#8BC34A 78%,#558B2F 100%);
-  transition:background 2s;
+.sky{position:fixed;inset:0;z-index:0;background:linear-gradient(180deg,#4FC3F7 0%,#87CEEB 45%,#C8E6C9 72%,#66BB6A 100%);}
+.sun{position:fixed;top:16px;right:24px;width:64px;height:64px;background:radial-gradient(circle,#FFD700,#FFA500);border-radius:50%;box-shadow:0 0 30px #FFD700,0 0 60px rgba(255,215,0,0.4);animation:sunPulse 3s ease-in-out infinite;z-index:0;}
+@keyframes sunPulse{0%,100%{box-shadow:0 0 30px #FFD700,0 0 60px rgba(255,215,0,0.4);}50%{box-shadow:0 0 50px #FFD700,0 0 100px rgba(255,215,0,0.5);}}
+
+.cloud{position:fixed;background:#fff;border-radius:50px;opacity:0.9;animation:cloudMove linear infinite;}
+.cloud::before,.cloud::after{content:'';position:absolute;background:#fff;border-radius:50%;}
+.c1{width:110px;height:36px;top:9%;left:-130px;animation-duration:28s;}
+.c1::before{width:55px;height:50px;top:-28px;left:14px;}
+.c1::after{width:42px;height:40px;top:-22px;left:52px;}
+.c2{width:80px;height:28px;top:20%;left:-100px;animation-duration:38s;animation-delay:-14s;opacity:0.7;}
+.c2::before{width:40px;height:38px;top:-22px;left:10px;}
+.c2::after{width:32px;height:32px;top:-16px;left:38px;}
+.c3{width:140px;height:40px;top:6%;left:-160px;animation-duration:22s;animation-delay:-8s;}
+.c3::before{width:65px;height:58px;top:-32px;left:18px;}
+.c3::after{width:50px;height:46px;top:-26px;left:65px;}
+@keyframes cloudMove{from{left:-200px;}to{left:110vw;}}
+
+.screen{display:none;position:relative;z-index:1;}
+.screen.active{display:flex;flex-direction:column;align-items:center;min-height:100vh;}
+
+/* ===== MENU ===== */
+#menu{padding:16px 16px 36px;text-align:center;}
+.menu-emoji{font-size:64px;animation:carBounce 0.9s ease-in-out infinite alternate;display:block;margin-top:8px;}
+@keyframes carBounce{from{transform:translateY(0);}to{transform:translateY(-10px);}}
+.menu-title{font-size:36px;font-weight:900;color:#1a237e;text-shadow:3px 3px 0 #fff;margin:8px 0 4px;}
+.menu-sub{font-size:14px;color:#fff;background:rgba(0,0,0,0.18);padding:5px 16px;border-radius:50px;margin:0 0 20px;font-weight:700;display:inline-block;}
+.table-label{font-size:15px;font-weight:800;color:#1a237e;margin-bottom:8px;}
+.tables-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;max-width:340px;width:100%;margin-bottom:18px;}
+.tbl-btn{padding:11px 4px;border-radius:13px;border:3px solid #fff;background:#FFF9C4;color:#E65100;font-family:'Nunito',sans-serif;font-size:16px;font-weight:900;cursor:pointer;transition:all 0.15s;box-shadow:0 4px 0 #E65100;}
+.tbl-btn:active{transform:translateY(3px);box-shadow:0 1px 0 #E65100;}
+.tbl-btn.selected{background:#FF6F00;color:#fff;box-shadow:0 4px 0 #BF360C;border-color:#FF6F00;}
+.tbl-btn.all{background:#1565C0;color:#fff;box-shadow:0 4px 0 #0D47A1;border-color:#1565C0;grid-column:span 4;font-size:14px;padding:9px;}
+.tbl-btn.div{background:#FFF9C4;color:#1565C0;box-shadow:0 4px 0 #1565C0;border-color:#1565C0;}
+.tbl-btn.div.selected{background:#1565C0;color:#fff;box-shadow:0 4px 0 #0D47A1;border-color:#1565C0;}
+.tbl-btn.mix{background:#FFF9C4;color:#7B1FA2;box-shadow:0 4px 0 #7B1FA2;border-color:#7B1FA2;}
+.tbl-btn.mix.selected{background:#7B1FA2;color:#fff;box-shadow:0 4px 0 #4A148C;border-color:#7B1FA2;}
+.mode-label{font-size:14px;font-weight:800;color:#1a237e;margin-bottom:8px;margin-top:8px;}
+.tbl-btn.all-div{background:#0D47A1;color:#fff;box-shadow:0 4px 0 #082666;border-color:#0D47A1;grid-column:span 4;font-size:14px;padding:9px;}
+.tbl-btn.all-mix{background:#6A1B9A;color:#fff;box-shadow:0 4px 0 #38006b;border-color:#6A1B9A;grid-column:span 4;font-size:14px;padding:9px;}
+.super-btn{animation:superPulse 1.5s ease-in-out infinite;}
+@keyframes superPulse{0%,100%{box-shadow:0 4px 0 #7F0000;}50%{box-shadow:0 4px 0 #7F0000,0 0 20px rgba(230,81,0,0.6);}}
+.mode-wrap{display:flex;flex-direction:column;gap:11px;width:100%;max-width:340px;}
+.mode-big-btn{padding:18px 22px;border-radius:20px;border:3px solid rgba(255,255,255,0.6);cursor:pointer;font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;color:#fff;display:flex;align-items:center;gap:12px;transition:all 0.15s;box-shadow:0 5px 0 rgba(0,0,0,0.2);}
+.mode-big-btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,0.2);}
+.mb-icon{font-size:32px;flex-shrink:0;}
+.mb-text{display:flex;flex-direction:column;text-align:left;}
+.mb-name{font-size:17px;}
+.mb-desc{font-size:11px;font-weight:600;opacity:0.85;margin-top:2px;}
+.btn-solo{background:linear-gradient(135deg,#FF6B6B,#D32F2F);}
+.btn-duo{background:linear-gradient(135deg,#43A047,#1B5E20);}
+.author-tag{margin-top:20px;color:rgba(0,0,0,0.25);font-size:11px;letter-spacing:2px;font-weight:700;}
+
+/* ===== TRACKS ===== */
+.race-header{background:rgba(0,0,0,0.14);padding:9px 14px;display:flex;align-items:center;justify-content:space-between;width:100%;}
+.back-btn{background:#fff;border:none;color:#1a237e;font-family:'Nunito',sans-serif;font-size:13px;font-weight:800;padding:7px 15px;border-radius:50px;cursor:pointer;box-shadow:0 3px 0 rgba(0,0,0,0.15);transition:all 0.15s;}
+.back-btn:active{transform:translateY(2px);}
+.race-info{color:#fff;font-size:14px;font-weight:800;text-shadow:1px 1px 0 rgba(0,0,0,0.25);}
+
+.tracks-wrap{width:100%;padding:10px 10px 6px;display:flex;flex-direction:column;gap:8px;}
+.track-row{background:rgba(0,0,0,0.1);border-radius:18px;padding:9px 11px;}
+.track-label{display:flex;align-items:center;gap:7px;margin-bottom:6px;}
+.pl-name{font-size:13px;font-weight:900;color:#fff;text-shadow:1px 1px 0 rgba(0,0,0,0.25);}
+.pl-score{margin-left:auto;background:rgba(255,255,255,0.25);border-radius:50px;padding:2px 11px;color:#fff;font-size:12px;font-weight:800;}
+
+/* Road */
+.road{height:48px;background:linear-gradient(180deg,#616161,#424242);border-radius:14px;position:relative;overflow:hidden;border:3px solid #212121;}
+/* Grass strips on road edges */
+.road::before,.road::after{content:'';position:absolute;left:0;right:0;height:6px;background:repeating-linear-gradient(90deg,#388E3C 0,#388E3C 20px,#2E7D32 20px,#2E7D32 40px);}
+.road::before{top:0;}
+.road::after{bottom:0;}
+
+.road-dash{position:absolute;top:50%;left:0;right:0;height:4px;transform:translateY(-50%);background:repeating-linear-gradient(90deg,#FFD700 0,#FFD700 28px,transparent 28px,transparent 56px);animation:dashMove 0.4s linear infinite;}
+@keyframes dashMove{from{transform:translateY(-50%) translateX(0);}to{transform:translateY(-50%) translateX(56px);}}
+.road-dash.stopped{animation:none;}
+
+/* Car moves LEFT → RIGHT */
+.track-car{position:absolute;top:50%;transform:translateY(-55%) scaleX(-1);font-size:30px;transition:left 0.55s cubic-bezier(0.34,1.4,0.64,1);z-index:3;filter:drop-shadow(2px 2px 3px rgba(0,0,0,0.35));}
+.finish-flag{position:absolute;right:6px;top:50%;transform:translateY(-50%);font-size:24px;z-index:2;}
+.speed-bar{height:6px;background:rgba(255,255,255,0.25);border-radius:3px;margin-top:6px;overflow:hidden;}
+.speed-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,#FFD700,#FF6B6B);transition:width 0.5s ease;}
+
+/* ===== SOLO SCREEN ===== */
+#soloScreen{padding:0 0 20px;width:100%;}
+.question-area{margin:8px 10px;background:#fff;border-radius:22px;padding:18px 14px;text-align:center;box-shadow:0 5px 0 rgba(0,0,0,0.08);border:3px solid #E3F2FD;}
+.q-label{font-size:11px;font-weight:800;color:#90A4AE;letter-spacing:2px;text-transform:uppercase;margin-bottom:6px;}
+.q-number{font-size:46px;font-weight:900;color:#1a237e;animation:qPop 0.35s ease;}
+@keyframes qPop{0%{transform:scale(0.5);opacity:0;}70%{transform:scale(1.1);}100%{transform:scale(1);opacity:1;}}
+.solo-answers{display:grid;grid-template-columns:1fr 1fr;gap:9px;padding:0 10px;}
+.ans-btn{padding:17px 8px;border-radius:16px;border:3px solid rgba(0,0,0,0.1);font-family:'Nunito',sans-serif;font-size:22px;font-weight:900;cursor:pointer;transition:all 0.12s;color:#fff;box-shadow:0 5px 0 rgba(0,0,0,0.18);}
+.ans-btn:active{transform:translateY(4px);box-shadow:0 1px 0 rgba(0,0,0,0.18);}
+.a0{background:#FF5252;box-shadow:0 5px 0 #B71C1C;}
+.a1{background:#FF9800;box-shadow:0 5px 0 #E65100;}
+.a2{background:#4CAF50;box-shadow:0 5px 0 #2E7D32;}
+.a3{background:#2196F3;box-shadow:0 5px 0 #1565C0;}
+.ans-btn.correct-flash{animation:cFlash 0.4s ease;background:#4CAF50!important;box-shadow:0 5px 0 #2E7D32!important;}
+.ans-btn.wrong-flash{animation:wShake 0.4s ease;}
+@keyframes cFlash{0%{transform:scale(1);}50%{transform:scale(1.08);}100%{transform:scale(1);}}
+@keyframes wShake{0%,100%{transform:translateX(0);}30%{transform:translateX(-8px);}70%{transform:translateX(8px);}}
+
+/* ===== DUO SCREEN ===== */
+#duoScreen{padding:0 0 16px;width:100%;}
+
+.duo-players-wrap{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:8px 10px 4px;
 }
-.sun{position:absolute;top:22px;right:50px;width:62px;height:62px;border-radius:50%;background:#FFD600;box-shadow:0 0 0 12px #FFE08255,0 0 0 24px #FFE08222;transition:background 2s,box-shadow 2s,opacity 1.5s;z-index:2}
-.moon{position:absolute;top:22px;right:50px;width:62px;height:62px;border-radius:50%;background:#E8E8E8;opacity:0;transition:opacity 1.5s;z-index:2}
-.cloud{position:absolute;background:white;border-radius:60px;transition:background 2s,opacity 1.5s}
-.cl1{width:95px;height:36px;top:30px;left:6%;animation:cloudDrift 8s ease-in-out infinite}
-.cl1::before{content:'';position:absolute;width:50px;height:50px;background:inherit;border-radius:50%;top:-22px;left:14px}
-.cl1::after{content:'';position:absolute;width:34px;height:34px;background:inherit;border-radius:50%;top:-14px;left:50px}
-.cl2{width:78px;height:30px;top:62px;left:38%;animation:cloudDrift2 10s ease-in-out infinite}
-.cl2::before{content:'';position:absolute;width:40px;height:40px;background:inherit;border-radius:50%;top:-18px;left:12px}
-.cl3{width:88px;height:33px;top:22px;left:62%;animation:cloudDrift 12s ease-in-out infinite 2s}
-.cl3::before{content:'';position:absolute;width:44px;height:44px;background:inherit;border-radius:50%;top:-20px;left:16px}
-.cl3::after{content:'';position:absolute;width:30px;height:30px;background:inherit;border-radius:50%;top:-12px;left:48px}
 
-.ground{position:absolute;bottom:0;left:0;right:0;height:27%;background:linear-gradient(180deg,#8BC34A,#558B2F);border-radius:0 0 16px 16px;transition:background 2s}
-.tracks{position:absolute;bottom:26.5%;left:0;right:0;height:14px;background:#5D4037}
-.rail{position:absolute;height:4px;left:0;right:0;background:#3E2723}
-.r1{top:2px}.r2{bottom:2px}
-
-#qbubble{
-  position:absolute;top:62px;left:50%;transform:translateX(-50%);
-  background:white;border-radius:28px;padding:18px 34px 20px;
-  box-shadow:0 10px 40px rgba(0,0,0,.2);border:3px solid #81D4FA;
-  text-align:center;z-index:10;min-width:270px;max-width:86%;
-  animation:fallDown .7s cubic-bezier(.17,.67,.38,1.2) forwards;
+.duo-player-panel{
+  border-radius:18px;
+  padding:10px 8px;
+  display:flex;flex-direction:column;align-items:center;
+  gap:8px;
 }
-#qbubble::after{content:'';position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:22px solid white}
-#qtext{font-size:28px;font-weight:900;color:#1A237E;line-height:1.2;display:block}
+.dp-p1{background:rgba(255,82,82,0.12);border:2px solid rgba(255,82,82,0.35);}
+.dp-p2{background:rgba(33,150,243,0.12);border:2px solid rgba(33,150,243,0.35);}
 
-.hud-top{position:absolute;top:14px;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:0 16px;z-index:15;pointer-events:none}
-.lives{font-size:22px}
-.score-box{background:#FFD600;border-radius:50px;padding:5px 16px;font-size:16px;font-weight:800;color:#333;box-shadow:0 3px 12px rgba(0,0,0,.2)}
-.prog-box{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);color:white;font-size:13px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.5);z-index:10;white-space:nowrap}
-
-/* THE TRAIN — absolutely positioned, moves via JS left */
-#trainWrap{
-  position:absolute;
-  bottom:27%;
-  display:flex;align-items:flex-end;gap:8px;padding:0;
-  z-index:5;
-  will-change:left;
+.dp-header{
+  width:100%;text-align:center;
+  border-radius:10px;padding:5px 4px;
+  font-size:13px;font-weight:900;color:#fff;
+  letter-spacing:0.5px;
 }
+.dp-p1 .dp-header{background:#FF5252;}
+.dp-p2 .dp-header{background:#2196F3;}
 
-.loco{width:90px;height:74px;background:#D32F2F;border-radius:14px 20px 4px 4px;position:relative;flex-shrink:0}
-.chimney{position:absolute;top:-28px;left:14px;width:20px;height:28px;background:#B71C1C;border-radius:5px 5px 0 0}
-.smoke{position:absolute;top:-10px;left:2px;width:17px;height:17px;background:rgba(210,210,210,.85);border-radius:50%;animation:smokeRise 1.7s ease-out infinite}
-.smoke2{animation-delay:.7s;width:13px;height:13px;top:-6px;left:5px}
-.cab{position:absolute;top:9px;left:16px;width:26px;height:22px;background:#81D4FA;border-radius:4px;border:2px solid white}
-.headlight{position:absolute;right:-11px;top:46%;width:17px;height:17px;background:#FFD600;border-radius:50%;box-shadow:0 0 10px #FFD600}
-.lbody{position:absolute;bottom:13px;left:0;right:0;height:16px;background:#C62828;border-radius:4px}
-.lw{position:absolute;bottom:-13px;width:24px;height:24px;background:#3E2723;border-radius:50%;border:3px solid #795548;animation:wheelSpin .7s linear infinite}
-.lw1{left:6px}.lw2{right:6px}
-.lw-s{position:absolute;inset:2px;border-radius:50%;border:2px solid #795548}
-
-.wagon{
-  width:128px;height:68px;border-radius:10px 10px 4px 4px;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  cursor:pointer;position:relative;border-bottom:4px solid rgba(0,0,0,.2);
-  gap:2px;flex-shrink:0;
-  transition:opacity .3s,box-shadow .2s;
-  box-shadow:0 5px 14px rgba(0,0,0,.25);
+.dp-question{
+  background:#fff;border-radius:14px;
+  padding:10px 6px;text-align:center;
+  width:100%;
+  box-shadow:0 3px 0 rgba(0,0,0,0.08);
+  border:2px solid #E3F2FD;
 }
-.wagon:hover{filter:brightness(1.12);transform:translateY(-6px)}
-.wg-plus{background:linear-gradient(145deg,#2E7D32,#4CAF50)}
-.wg-minus{background:linear-gradient(145deg,#B71C1C,#EF5350)}
-.wg-times{background:linear-gradient(145deg,#1565C0,#42A5F5)}
-.wg-divide{background:linear-gradient(145deg,#E65100,#FF9800)}
-.wsign{font-size:32px;font-weight:900;color:white;line-height:1;text-shadow:0 3px 8px rgba(0,0,0,.3)}
-.wlabel{font-size:10px;color:rgba(255,255,255,.95);font-weight:800;text-align:center;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.4)}
-.ww{position:absolute;bottom:-13px;width:20px;height:20px;background:#3E2723;border-radius:50%;border:3px solid #5D4037}
-.ww1{left:9px}.ww2{right:9px}
-.coupler{position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:12px;height:5px;background:#888;border-radius:0 3px 3px 0;z-index:2}
+.dp-q-label{font-size:9px;font-weight:800;color:#90A4AE;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px;}
+.dp-q-num{font-size:26px;font-weight:900;color:#1a237e;line-height:1;}
 
-#feedback{position:absolute;top:32%;left:50%;transform:translateX(-50%) scale(0);font-size:68px;z-index:20;pointer-events:none;transition:transform .35s cubic-bezier(.17,.67,.38,1.5)}
-#feedback.show{transform:translateX(-50%) scale(1)}
+.dp-opts{
+  display:grid;grid-template-columns:1fr 1fr;
+  gap:6px;width:100%;
+}
+.dp-btn{
+  padding:12px 4px;border-radius:12px;
+  border:2px solid rgba(0,0,0,0.1);
+  font-family:'Nunito',sans-serif;font-size:17px;font-weight:900;
+  cursor:pointer;color:#fff;text-align:center;
+  transition:all 0.12s;
+  box-shadow:0 3px 0 rgba(0,0,0,0.18);
+}
+.dp-btn:active{transform:translateY(3px);box-shadow:0 0 0 rgba(0,0,0,0.18);}
+.p1-b0{background:#FF5252;box-shadow:0 3px 0 #B71C1C;}
+.p1-b1{background:#E91E63;box-shadow:0 3px 0 #880E4F;}
+.p1-b2{background:#FF9800;box-shadow:0 3px 0 #E65100;}
+.p1-b3{background:#F44336;box-shadow:0 3px 0 #B71C1C;}
+.p2-b0{background:#2196F3;box-shadow:0 3px 0 #1565C0;}
+.p2-b1{background:#9C27B0;box-shadow:0 3px 0 #6A1B9A;}
+.p2-b2{background:#00BCD4;box-shadow:0 3px 0 #006064;}
+.p2-b3{background:#3F51B5;box-shadow:0 3px 0 #1A237E;}
+.dp-btn.correct-flash{animation:cFlash 0.4s ease;background:#4CAF50!important;box-shadow:0 3px 0 #2E7D32!important;}
+.dp-btn.wrong-flash{animation:wShake 0.35s ease;}
 
-.confetti-piece{position:absolute;z-index:25;pointer-events:none;animation:confettiFall 1.2s ease-in forwards}
-.star-sky{position:absolute;border-radius:50%;background:white;opacity:0;transition:opacity 1.5s}
+/* Duo score strip */
+.duo-score-strip{
+  background:rgba(0,0,0,0.14);margin:0 10px;
+  border-radius:14px;padding:7px 16px;
+  display:flex;align-items:center;justify-content:space-between;
+  color:#fff;font-size:15px;font-weight:900;
+}
+.vs-badge{background:#FFD700;color:#1a237e;border-radius:50px;padding:2px 12px;font-size:13px;}
 
-.result{position:absolute;inset:0;background:rgba(255,255,255,.96);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;z-index:30}
-.result h2{font-size:30px;color:#2E7D32}
-.result p{font-size:19px;color:#555}
-.result .pts{font-size:28px;color:#FF9800;font-weight:800}
-.btn-again{background:#4CAF50;color:white;border:none;border-radius:50px;padding:13px 38px;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(76,175,80,.45);margin-top:4px}
-.btn-again:hover{background:#388E3C}
-.correct-highlight{animation:glow .6s ease infinite;transform:translateY(-10px) scale(1.08)!important}
-.shake-it{animation:shake .4s ease!important}
+/* ===== RESULTS ===== */
+#results{justify-content:center;align-items:center;text-align:center;padding:30px 16px;}
+.result-card{background:#fff;border-radius:28px;padding:32px 24px;max-width:360px;width:100%;box-shadow:0 8px 0 rgba(0,0,0,0.08);border:4px solid #E3F2FD;}
+.result-emoji{font-size:76px;margin-bottom:10px;display:block;animation:resultBounce 0.5s ease;}
+@keyframes resultBounce{0%{transform:scale(0) rotate(-20deg);}70%{transform:scale(1.15) rotate(5deg);}100%{transform:scale(1) rotate(0);}}
+.result-title{font-size:30px;font-weight:900;color:#1a237e;margin-bottom:6px;}
+.result-stars{font-size:30px;margin:8px 0;}
+.result-score{font-size:17px;color:#546E7A;margin-bottom:4px;font-weight:700;}
+.result-btns{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:22px;}
+.res-btn{padding:14px 26px;border-radius:50px;border:none;font-family:'Nunito',sans-serif;font-size:14px;font-weight:900;cursor:pointer;transition:all 0.15s;box-shadow:0 4px 0 rgba(0,0,0,0.18);}
+.res-btn:active{transform:translateY(3px);box-shadow:0 1px 0 rgba(0,0,0,0.18);}
+.res-btn.primary{background:#FF6B6B;color:#fff;box-shadow:0 4px 0 #B71C1C;}
+.res-btn.secondary{background:#E3F2FD;color:#1a237e;box-shadow:0 4px 0 #90CAF9;}
+
+/* TOAST */
+.toast{position:fixed;top:14px;left:50%;transform:translateX(-50%) translateY(-100px);padding:10px 22px;border-radius:50px;font-size:15px;font-weight:800;transition:transform 0.28s cubic-bezier(0.34,1.56,0.64,1);z-index:999;white-space:nowrap;box-shadow:0 6px 24px rgba(0,0,0,0.2);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+.toast.correct-t{background:#4CAF50;color:#fff;}
+.toast.wrong-t{background:#FF5252;color:#fff;}
+.toast.info-t{background:#fff;color:#1a237e;border:2px solid #E3F2FD;}
+
+/* CONFETTI */
+.confetti-piece{position:fixed;border-radius:3px;animation:confettiFall linear forwards;pointer-events:none;z-index:9999;}
+@keyframes confettiFall{0%{transform:translateY(-30px) rotate(0deg);opacity:1;}100%{transform:translateY(110vh) rotate(540deg);opacity:0;}}
+
+/* Music */
+.music-btn{position:fixed;bottom:14px;right:14px;z-index:99;width:44px;height:44px;border-radius:50%;background:#fff;border:3px solid #E3F2FD;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 0 rgba(0,0,0,0.1);}
+
+/* Winner overlay */
+.winner-overlay{display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,0.55);align-items:center;justify-content:center;}
+.winner-overlay.show{display:flex;}
+.winner-box{background:#fff;border-radius:28px;padding:36px 28px;text-align:center;max-width:300px;width:90%;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:resultBounce 0.5s ease;}
+.w-emoji{font-size:64px;display:block;margin-bottom:10px;}
+.w-title{font-size:26px;font-weight:900;color:#1a237e;margin-bottom:6px;}
+.w-sub{font-size:15px;color:#546E7A;margin-bottom:20px;font-weight:700;}
+.w-btns{display:flex;gap:10px;justify-content:center;}
 </style>
+</head>
+<body>
 
-<div id="game">
-  <div class="sun" id="sun"></div>
-  <div class="moon" id="moon"></div>
-  <div class="cloud cl1" id="cl1"></div>
-  <div class="cloud cl2" id="cl2"></div>
-  <div class="cloud cl3" id="cl3"></div>
-  <div class="hud-top">
-    <div class="lives" id="lives">❤️❤️❤️</div>
-    <div class="score-box">⭐ <span id="score">0</span></div>
-  </div>
-  <div id="qbubble"><span id="qtext">Загрузка...</span></div>
-  <div class="ground" id="ground">
-    <div class="tracks"><div class="rail r1"></div><div class="rail r2"></div></div>
-  </div>
-  <div id="trainWrap">
-    <div class="loco">
-      <div class="chimney"><div class="smoke"></div><div class="smoke smoke2"></div></div>
-      <div class="cab"></div><div class="headlight"></div><div class="lbody"></div>
-      <div class="lw lw1"><div class="lw-s"></div></div>
-      <div class="lw lw2"><div class="lw-s"></div></div>
-    </div>
-    <div class="wagon wg-plus" id="wPlus" onclick="pick('plus')">
-      <div class="wsign">+</div><div class="wlabel">ПРИБАВИТЬ<br>на … больше</div>
-      <div class="ww ww1"></div><div class="ww ww2"></div><div class="coupler"></div>
-    </div>
-    <div class="wagon wg-minus" id="wMinus" onclick="pick('minus')">
-      <div class="wsign">−</div><div class="wlabel">ОТНЯТЬ<br>на … меньше</div>
-      <div class="ww ww1"></div><div class="ww ww2"></div><div class="coupler"></div>
-    </div>
-    <div class="wagon wg-times" id="wTimes" onclick="pick('times')">
-      <div class="wsign">×</div><div class="wlabel">УМНОЖИТЬ<br>в … раз больше</div>
-      <div class="ww ww1"></div><div class="ww ww2"></div><div class="coupler"></div>
-    </div>
-    <div class="wagon wg-divide" id="wDivide" onclick="pick('divide')">
-      <div class="wsign">÷</div><div class="wlabel">ДЕЛИТЬ<br>в … раз меньше</div>
-      <div class="ww ww1"></div><div class="ww ww2"></div>
+<div class="sky"></div>
+<div class="sun"></div>
+<div class="cloud c1"></div>
+<div class="cloud c2"></div>
+<div class="cloud c3"></div>
+<div class="toast" id="toast"></div>
+<div id="confettiBox" style="position:fixed;inset:0;pointer-events:none;z-index:9999;"></div>
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
+
+<!-- Winner overlay -->
+<div class="winner-overlay" id="winnerOverlay">
+  <div class="winner-box">
+    <span class="w-emoji" id="wEmoji"></span>
+    <div class="w-title" id="wTitle"></div>
+    <div class="w-sub" id="wSub"></div>
+    <div class="w-btns">
+      <button class="res-btn primary" onclick="closeWinner();playAgain()">Ещё раз!</button>
+      <button class="res-btn secondary" onclick="closeWinner();goMenu()">Меню</button>
     </div>
   </div>
-  <div id="feedback"></div>
-  <div class="prog-box" id="progress"></div>
+</div>
+
+<!-- ===== MENU ===== -->
+<div class="screen active" id="menu">
+  <span class="menu-emoji">🚗</span>
+  <div class="menu-title">Гонки!</div>
+  <div class="menu-sub">Таблица умножения 🏁</div>
+  <div class="table-label">Выбери таблицу:</div>
+  <div class="mode-label">✖️ Умножение:</div>
+  <div class="tables-grid">
+    <button class="tbl-btn" onclick="selectMode('mul',2,this)">× 2</button>
+    <button class="tbl-btn" onclick="selectMode('mul',3,this)">× 3</button>
+    <button class="tbl-btn" onclick="selectMode('mul',4,this)">× 4</button>
+    <button class="tbl-btn" onclick="selectMode('mul',5,this)">× 5</button>
+    <button class="tbl-btn" onclick="selectMode('mul',6,this)">× 6</button>
+    <button class="tbl-btn" onclick="selectMode('mul',7,this)">× 7</button>
+    <button class="tbl-btn" onclick="selectMode('mul',8,this)">× 8</button>
+    <button class="tbl-btn" onclick="selectMode('mul',9,this)">× 9</button>
+    <button class="tbl-btn all" onclick="selectMode('mul',0,this)">🎲 Все × вместе</button>
+  </div>
+  <div class="mode-label">➗ Деление:</div>
+  <div class="tables-grid">
+    <button class="tbl-btn div" onclick="selectMode('div',2,this)">÷ 2</button>
+    <button class="tbl-btn div" onclick="selectMode('div',3,this)">÷ 3</button>
+    <button class="tbl-btn div" onclick="selectMode('div',4,this)">÷ 4</button>
+    <button class="tbl-btn div" onclick="selectMode('div',5,this)">÷ 5</button>
+    <button class="tbl-btn div" onclick="selectMode('div',6,this)">÷ 6</button>
+    <button class="tbl-btn div" onclick="selectMode('div',7,this)">÷ 7</button>
+    <button class="tbl-btn div" onclick="selectMode('div',8,this)">÷ 8</button>
+    <button class="tbl-btn div" onclick="selectMode('div',9,this)">÷ 9</button>
+    <button class="tbl-btn all-div" onclick="selectMode('div',0,this)">🎲 Все ÷ вместе</button>
+  </div>
+  <div class="mode-label">🔀 Вперемешку:</div>
+  <div class="tables-grid">
+    <button class="tbl-btn mix" onclick="selectMode('mix',2,this)">× ÷ 2</button>
+    <button class="tbl-btn mix" onclick="selectMode('mix',3,this)">× ÷ 3</button>
+    <button class="tbl-btn mix" onclick="selectMode('mix',4,this)">× ÷ 4</button>
+    <button class="tbl-btn mix" onclick="selectMode('mix',5,this)">× ÷ 5</button>
+    <button class="tbl-btn mix" onclick="selectMode('mix',6,this)">× ÷ 6</button>
+    <button class="tbl-btn mix" onclick="selectMode('mix',7,this)">× ÷ 7</button>
+    <button class="tbl-btn mix" onclick="selectMode('mix',8,this)">× ÷ 8</button>
+    <button class="tbl-btn mix" onclick="selectMode('mix',9,this)">× ÷ 9</button>
+    <button class="tbl-btn all-mix" onclick="selectMode('mix',0,this)">🔀 Всё вместе</button>
+  </div>
+  <div class="mode-label" style="color:#E65100;">⚡ Суперраунд:</div>
+  <div class="tables-grid">
+    <button class="tbl-btn" style="grid-column:span 4;background:linear-gradient(135deg,#E65100,#B71C1C);color:#fff;border-color:#FF6D00;box-shadow:0 4px 0 #7F0000;font-size:15px;padding:14px;" onclick="selectMode('supermix',0,this)">⚡ × и ÷ ВРАЗБРОС — ВСЯ ТАБЛИЦА</button>
+  </div>
+  <div class="mode-wrap">
+    <button class="mode-big-btn btn-solo" onclick="startSolo()">
+      <span class="mb-icon">🚗</span>
+      <span class="mb-text">
+        <span class="mb-name">Один игрок</span>
+        <span class="mb-desc">10 вопросов — доедь до финиша!</span>
+      </span>
+    </button>
+    <button class="mode-big-btn btn-duo" onclick="startDuo()">
+      <span class="mb-icon">🚗🚙</span>
+      <span class="mb-text">
+        <span class="mb-name">Соревнование на двоих</span>
+        <span class="mb-desc">Свои примеры у каждого — кто быстрее?</span>
+      </span>
+    </button>
+  </div>
+  <div class="author-tag">@dlya.urokov23</div>
+</div>
+
+<!-- ===== SOLO SCREEN ===== -->
+<div class="screen" id="soloScreen">
+  <div class="race-header">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="race-info" id="soloInfo">Вопрос 1 / 10</div>
+  </div>
+  <div class="tracks-wrap">
+    <div class="track-row">
+      <div class="track-label">
+        <span class="pl-name">🚗 Гонщик</span>
+        <span class="pl-score" id="soloScore">0 ✅</span>
+      </div>
+      <div class="road" id="soloRoad">
+        <div class="road-dash" id="soloDash"></div>
+        <div class="track-car" id="soloCar" style="left:4px;transform:translateY(-55%) scaleX(-1);">🚗</div>
+        <div class="finish-flag">🏁</div>
+      </div>
+      <div class="speed-bar"><div class="speed-fill" id="soloSpeed" style="width:0%"></div></div>
+    </div>
+  </div>
+  <div class="question-area">
+    <div class="q-label">Сколько будет?</div>
+    <div class="q-number" id="soloQ">3 × 4 = ?</div>
+  </div>
+  <div class="solo-answers">
+    <button class="ans-btn a0" id="sa0" onclick="soloAns(0)"></button>
+    <button class="ans-btn a1" id="sa1" onclick="soloAns(1)"></button>
+    <button class="ans-btn a2" id="sa2" onclick="soloAns(2)"></button>
+    <button class="ans-btn a3" id="sa3" onclick="soloAns(3)"></button>
+  </div>
+</div>
+
+<!-- ===== DUO SCREEN ===== -->
+<div class="screen" id="duoScreen">
+  <div class="race-header">
+    <button class="back-btn" onclick="goMenu()">← Меню</button>
+    <div class="race-info">Первый до 10 — победитель!</div>
+  </div>
+
+  <!-- Two tracks -->
+  <div class="tracks-wrap">
+    <div class="track-row">
+      <div class="track-label">
+        <span class="pl-name">🚗 Игрок 1</span>
+        <span class="pl-score" id="d1Score">0 ✅</span>
+      </div>
+      <div class="road">
+        <div class="road-dash" id="dash1"></div>
+        <div class="track-car" id="car1" style="left:4px;transform:translateY(-55%) scaleX(-1);">🚗</div>
+        <div class="finish-flag">🏁</div>
+      </div>
+      <div class="speed-bar"><div class="speed-fill" id="speed1" style="width:0%"></div></div>
+    </div>
+    <div class="track-row">
+      <div class="track-label">
+        <span class="pl-name">🚙 Игрок 2</span>
+        <span class="pl-score" id="d2Score">0 ✅</span>
+      </div>
+      <div class="road">
+        <div class="road-dash" id="dash2"></div>
+        <div class="track-car" id="car2" style="left:4px;transform:translateY(-55%) scaleX(-1);">🚙</div>
+        <div class="finish-flag">🏁</div>
+      </div>
+      <div class="speed-bar"><div class="speed-fill" id="speed2" style="width:0%"></div></div>
+    </div>
+  </div>
+
+  <!-- Score strip -->
+  <div class="duo-score-strip">
+    <span>🚗 <span id="ds1">0</span></span>
+    <span class="vs-badge">VS</span>
+    <span><span id="ds2">0</span> 🚙</span>
+  </div>
+
+  <!-- Two independent question panels -->
+  <div class="duo-players-wrap">
+    <!-- Player 1 -->
+    <div class="duo-player-panel dp-p1">
+      <div class="dp-header">🚗 Игрок 1</div>
+      <div class="dp-question">
+        <div class="dp-q-label">Твой пример</div>
+        <div class="dp-q-num" id="p1Q">?</div>
+      </div>
+      <div class="dp-opts" id="p1Opts"></div>
+    </div>
+    <!-- Player 2 -->
+    <div class="duo-player-panel dp-p2">
+      <div class="dp-header">🚙 Игрок 2</div>
+      <div class="dp-question">
+        <div class="dp-q-label">Твой пример</div>
+        <div class="dp-q-num" id="p2Q">?</div>
+      </div>
+      <div class="dp-opts" id="p2Opts"></div>
+    </div>
+  </div>
+</div>
+
+<!-- RESULTS -->
+<div class="screen" id="results">
+  <div class="result-card">
+    <span class="result-emoji" id="resEmoji">🏆</span>
+    <div class="result-title" id="resTitle"></div>
+    <div class="result-stars" id="resStars"></div>
+    <div class="result-score" id="resScore"></div>
+    <div class="result-btns">
+      <button class="res-btn primary" onclick="playAgain()">Ещё раз! 🔄</button>
+      <button class="res-btn secondary" onclick="goMenu()">Меню 🏠</button>
+    </div>
+  </div>
 </div>
 
 <script>
-const qs=[
-  {t:"Увеличь В 4 РАЗА",a:"times"},{t:"В 7 РАЗ БОЛЬШЕ",a:"times"},
-  {t:"Увеличить В 3 РАЗА",a:"times"},{t:"Стало В 5 РАЗ БОЛЬШЕ",a:"times"},
-  {t:"В 9 РАЗ БОЛЬШЕ",a:"times"},{t:"Увеличить В 6 РАЗ",a:"times"},
-  {t:"В 2 РАЗА БОЛЬШЕ",a:"times"},
-  {t:"Уменьши В 6 РАЗ",a:"divide"},{t:"В 4 РАЗА МЕНЬШЕ",a:"divide"},
-  {t:"Уменьшить В 3 РАЗА",a:"divide"},{t:"Стало В 5 РАЗ МЕНЬШЕ",a:"divide"},
-  {t:"Уменьши В 2 РАЗА",a:"divide"},{t:"В 8 РАЗ МЕНЬШЕ",a:"divide"},
-  {t:"Уменьшить В 7 РАЗ",a:"divide"},
-  {t:"На 5 БОЛЬШЕ",a:"plus"},{t:"Прибавь 8",a:"plus"},
-  {t:"Увеличь НА 3",a:"plus"},{t:"НА 6 БОЛЬШЕ",a:"plus"},
-  {t:"Прибавить НА 10",a:"plus"},{t:"НА 4 БОЛЬШЕ",a:"plus"},
-  {t:"На 3 МЕНЬШЕ",a:"minus"},{t:"Отними 9",a:"minus"},
-  {t:"Уменьши НА 5",a:"minus"},{t:"НА 2 МЕНЬШЕ",a:"minus"},
-  {t:"Отнять НА 6",a:"minus"},{t:"НА 7 МЕНЬШЕ",a:"minus"},
-  {t:"Уменьшить НА 4",a:"minus"},
-];
+// ===== AUDIO =====
+let audioCtx=null,musicOn=true,bgTimer=null,bgIdx=0;
+const mel=[392,392,440,392,523,494,392,392,440,392,587,523];
+function getCtx(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)();return audioCtx;}
+function tone(f,d,type='square',vol=0.14){
+  try{const c=getCtx(),o=c.createOscillator(),g=c.createGain();
+  o.connect(g);g.connect(c.destination);o.type=type;o.frequency.value=f;
+  g.gain.setValueAtTime(vol,c.currentTime);g.gain.exponentialRampToValueAtTime(0.001,c.currentTime+d);
+  o.start();o.stop(c.currentTime+d);}catch(e){}
+}
+function playOk(){tone(523,.09,'square',.2);setTimeout(()=>tone(659,.09,'square',.2),75);setTimeout(()=>tone(784,.18,'square',.22),150);}
+function playNo(){tone(200,.07,'sawtooth',.18);setTimeout(()=>tone(150,.18,'sawtooth',.14),75);}
+function playClick(){tone(440,.07,'sine',.1);}
+function playWin(){[523,587,659,784,1047].forEach((f,i)=>setTimeout(()=>tone(f,.14,'square',.22),i*85));}
+function bgNote(){if(!musicOn)return;tone(mel[bgIdx%mel.length],.32,'triangle',.045);bgIdx++;bgTimer=setTimeout(bgNote,370);}
+function startBg(){stopBg();if(musicOn)bgNote();}
+function stopBg(){if(bgTimer)clearTimeout(bgTimer);}
+function toggleMusic(){musicOn=!musicOn;document.getElementById('musicBtn').textContent=musicOn?'🎵':'🔇';if(musicOn)startBg();else stopBg();playClick();}
 
-const wMap={plus:'wPlus',minus:'wMinus',times:'wTimes',divide:'wDivide'};
-const wOrder=['plus','minus','times','divide'];
-let pool=[],qi=0,score=0,hearts=3,total=12,locked=false;
-let bobTimer=null;
-
-function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
-
-// Train dimensions: loco=90, gap=8, wagon=128, gap=8 repeated
-// Offsets of wagon centres from trainWrap left edge:
-// wagon[i] centre = 90 + 8 + i*(128+8) + 64
-function wagonCentreOffset(idx){ return 90+8+idx*136+64; }
-
-// Total train width
-const TRAIN_W = 90+8+4*128+3*8; // 650px
-
-function gameWidth(){ return document.getElementById('game').clientWidth; }
-
-// left value so train centre (325) sits at game centre
-function centreLeft(){ return gameWidth()/2 - TRAIN_W/2; }
-
-// left value so wagon[idx] centre sits at game centre
-function wagonLeft(idx){ return gameWidth()/2 - wagonCentreOffset(idx); }
-
-function setTrainLeft(px, animate, duration){
-  const tw = document.getElementById('trainWrap');
-  tw.style.transition = animate ? `left ${duration||0.95}s cubic-bezier(.4,0,.2,1)` : 'none';
-  tw.style.left = px+'px';
+// Confetti
+const CC=['#FF5252','#FF9800','#FFEB3B','#4CAF50','#2196F3','#9C27B0','#FF4081'];
+function confetti(){
+  const b=document.getElementById('confettiBox');
+  for(let i=0;i<90;i++)setTimeout(()=>{
+    const p=document.createElement('div');p.className='confetti-piece';
+    p.style.cssText=`left:${Math.random()*100}vw;background:${CC[~~(Math.random()*CC.length)]};width:${7+Math.random()*8}px;height:${7+Math.random()*8}px;border-radius:${Math.random()>.5?'50%':'3px'};animation-duration:${1.8+Math.random()*2}s;animation-delay:${Math.random()*.5}s;`;
+    b.appendChild(p);setTimeout(()=>p.remove(),4200);
+  },i*22);
 }
 
-function startBob(){
-  stopBob();
-  const tw=document.getElementById('trainWrap');
-  tw.style.animation='bob 2s ease-in-out infinite';
-}
-function stopBob(){
-  const tw=document.getElementById('trainWrap');
-  tw.style.animation='none';
+// Toast
+let toastT=null;
+function toast(msg,type){
+  const t=document.getElementById('toast');if(toastT)clearTimeout(toastT);
+  t.textContent=msg;t.className=`toast show ${type}-t`;
+  toastT=setTimeout(()=>t.classList.remove('show'),1400);
 }
 
-function placeCentre(animate){
-  setTrainLeft(centreLeft(), animate, 1.1);
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function goMenu(){stopBg();playClick();showScreen('menu');startBg();}
+
+// ===== GAME STATE =====
+let selectedTable=2, mathMode='mul', currentMode='solo';
+
+function selectMode(mmode, n, el){
+  playClick();
+  selectedTable=n;
+  mathMode=mmode;
+  document.querySelectorAll('.tbl-btn').forEach(b=>b.classList.remove('selected'));
+  el.classList.add('selected');
 }
 
-function arriveFromLeft(){
-  // instantly place off-screen left, then animate to centre
-  setTrainLeft(-TRAIN_W-20, false);
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{
-    setTrainLeft(centreLeft(), true, 1.1);
-    setTimeout(startBob, 1150);
-  }));
-}
+// Generate question
+function genQ(){
+  // pick which operation
+  let op=mathMode;
+  if(op==='mix') op=Math.random()<0.5?'mul':'div';
+  if(op==='supermix'){ op=Math.random()<0.5?'mul':'div'; }
 
-function departToRight(cb){
-  stopBob();
-  setTrainLeft(gameWidth()+20, true, 0.9);
-  setTimeout(cb, 950);
-}
+  // supermix always uses all tables
+  const table=(selectedTable===0||mathMode==='supermix')?(~~(Math.random()*8)+2):selectedTable;
+  const b=~~(Math.random()*9)+1;
 
-function moveToWagon(idx, cb){
-  stopBob();
-  setTrainLeft(wagonLeft(idx), true, 0.9);
-  setTimeout(cb, 960);
-}
-
-// --- SKY ---
-function updateSky(q){
-  const game=document.getElementById('game');
-  const sun=document.getElementById('sun');
-  const moon=document.getElementById('moon');
-  const clouds=[document.getElementById('cl1'),document.getElementById('cl2'),document.getElementById('cl3')];
-  const ground=document.getElementById('ground');
-  const phase=Math.floor(q/4);
-  if(phase===0){
-    game.style.background='linear-gradient(180deg,#4FC3F7 0%,#81D4FA 30%,#B3E5FC 50%,#C8E6C9 65%,#8BC34A 78%,#558B2F 100%)';
-    sun.style.background='#FFD600';sun.style.boxShadow='0 0 0 12px #FFE08255,0 0 0 24px #FFE08222';sun.style.opacity='1';
-    moon.style.opacity='0';clouds.forEach(c=>{c.style.background='white';c.style.opacity='.92'});
-    ground.style.background='linear-gradient(180deg,#8BC34A,#558B2F)';
-  } else if(phase===1){
-    game.style.background='linear-gradient(180deg,#FF8C00 0%,#FFB347 20%,#FF6B6B 40%,#C8A07A 60%,#8B7355 78%,#5D4E37 100%)';
-    sun.style.background='#FF4500';sun.style.boxShadow='0 0 0 12px #FF450044,0 0 0 24px #FF450022';sun.style.opacity='1';
-    moon.style.opacity='0';clouds.forEach(c=>{c.style.background='#FFD4A0';c.style.opacity='.8'});
-    ground.style.background='linear-gradient(180deg,#8B7355,#5D4E37)';
+  if(op==='mul'){
+    return{expr:table+' × '+b,ans:table*b};
   } else {
-    game.style.background='linear-gradient(180deg,#0D1B2A 0%,#1B2A4A 30%,#2C3E6A 50%,#1A3A2A 65%,#1A3A1A 78%,#0D200D 100%)';
-    sun.style.opacity='0';moon.style.opacity='1';
-    clouds.forEach(c=>{c.style.background='#334';c.style.opacity='.35'});
-    ground.style.background='linear-gradient(180deg,#1A3A1A,#0D200D)';
-    addStars();
+    // division: table * b = product, question: product ÷ table = b
+    const product=table*b;
+    return{expr:product+' ÷ '+table,ans:b};
   }
 }
 
-function addStars(){
-  const game=document.getElementById('game');
-  if(game.querySelectorAll('.star-sky').length>0)return;
-  for(let i=0;i<18;i++){
-    const s=document.createElement('div');s.className='star-sky';
-    const sz=2+Math.random()*3;
-    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*50}%;left:${Math.random()*100}%;animation:starPulse ${1+Math.random()*2}s ease-in-out ${Math.random()*2}s infinite`;
-    game.appendChild(s);
-    setTimeout(()=>s.style.opacity=String(.4+Math.random()*.6),100);
+// Generate 4 answers including correct one
+function genOpts(correct){
+  const set=new Set([correct]);
+  let tries=0;
+  const range = correct<=10 ? 5 : 12;
+  while(set.size<4&&tries<60){
+    tries++;
+    const v=correct+~~(Math.random()*range*2+1)-range;
+    if(v>0&&v!==correct)set.add(v);
+  }
+  while(set.size<4) set.add(correct+set.size+1);
+  return shuffle([...set]);
+}
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5);}
+
+// Move car: progress 0→1, car goes left→right
+function moveCar(carId,speedId,progress){
+  const car=document.getElementById(carId);
+  const road=car.parentElement;
+  const roadW=road.offsetWidth||road.clientWidth||300;
+  const maxPx=roadW - 44 - 10;
+  car.style.left=Math.max(4,Math.min(4+progress*maxPx, roadW-44))+'px';
+  car.style.transform='translateY(-55%) scaleX(-1)';
+  document.getElementById(speedId).style.width=(progress*100)+'%';
+}
+
+// ===== SOLO =====
+let soloQ={},soloOpts=[],soloScore=0,soloTotal=10,soloAnswered=false,soloSteps=0;
+
+function startSolo(){
+  playClick();currentMode='solo';
+  soloScore=0;soloAnswered=false;soloSteps=0;
+  document.getElementById('soloScore').textContent='0 ✅';
+  moveCar('soloCar','soloSpeed',0); document.getElementById('soloCar').style.transform='translateY(-55%) scaleX(-1)';
+  document.getElementById('soloDash').classList.remove('stopped');
+  showScreen('soloScreen');startBg();
+  nextSoloQ();
+}
+
+function nextSoloQ(){
+  soloAnswered=false;
+  const idx=soloScore;
+  if(idx>=soloTotal){endSolo();return;}
+  soloQ=genQ();soloOpts=genOpts(soloQ.ans);
+  const el=document.getElementById('soloQ');
+  el.style.animation='none';void el.offsetWidth;el.style.animation='qPop 0.35s ease';
+  el.textContent=soloQ.expr+' = ?';
+  document.getElementById('soloInfo').textContent=`Вопрос ${idx+1} / ${soloTotal}`;
+  for(let i=0;i<4;i++){
+    const b=document.getElementById('sa'+i);
+    b.textContent=soloOpts[i];b.disabled=false;
+    b.className=`ans-btn a${i}`;
   }
 }
 
-function nextQ(){
-  if(qi>=total||hearts<=0){showResult();return}
-  updateSky(qi);
-  const q=pool[qi];
-  const b=document.getElementById('qbubble');
-  b.style.animation='none';void b.offsetWidth;
-  b.style.animation='fallDown .7s cubic-bezier(.17,.67,.38,1.2) forwards';
-  document.getElementById('qtext').textContent=q.t;
-  document.getElementById('progress').textContent='Вопрос '+(qi+1)+' из '+total;
-  locked=false;
-  Object.values(wMap).forEach(id=>{
-    const el=document.getElementById(id);
-    el.style.opacity='1';el.style.pointerEvents='auto';
-    el.classList.remove('correct-highlight','shake-it');
-    el.style.transform='';el.style.boxShadow='';
+function soloAns(i){
+  if(soloAnswered)return;soloAnswered=true;
+  const chosen=soloOpts[i];
+  const btn=document.getElementById('sa'+i);
+  if(chosen===soloQ.ans){
+    btn.classList.add('correct-flash');
+    soloScore++;soloSteps++;
+    document.getElementById('soloScore').textContent=soloScore+' ✅';
+    moveCar('soloCar','soloSpeed',soloSteps/soloTotal);
+    playOk();
+    toast('✅ '+soloQ.expr+'='+soloQ.ans,'correct');
+  } else {
+    btn.classList.add('wrong-flash');playNo();
+    // Car goes BACK one step
+    soloSteps=Math.max(0,soloSteps-1);
+    moveCar('soloCar','soloSpeed',soloSteps/soloTotal);
+    const car=document.getElementById('soloCar');
+    car.classList.remove('go-back');void car.offsetWidth;car.classList.add('go-back');
+    setTimeout(()=>car.classList.remove('go-back'),600);
+    toast('❌ Назад! '+soloQ.expr+'='+soloQ.ans,'wrong');
+    for(let j=0;j<4;j++)if(soloOpts[j]===soloQ.ans)document.getElementById('sa'+j).classList.add('correct-flash');
+  }
+  for(let j=0;j<4;j++)document.getElementById('sa'+j).disabled=true;
+  setTimeout(nextSoloQ,1200);
+}
+
+function endSolo(){
+  stopBg();document.getElementById('soloDash').classList.add('stopped');
+  const pct=Math.round(soloScore/soloTotal*100);
+  let e,t,s,m;
+  if(pct===100){e='🏆';t='ЧЕМПИОН!';s='⭐⭐⭐';m='Все 10 из 10! Идеальная гонка!';}
+  else if(pct>=70){e='🥇';t='Отлично!';s='⭐⭐';m=soloScore+' из '+soloTotal+'. Почти идеально!';}
+  else if(pct>=50){e='🥈';t='Хорошо!';s='⭐';m=soloScore+' из '+soloTotal+'. Тренируйся ещё!';}
+  else{e='🚧';t='Тренируйся!';s='💪';m=soloScore+' из '+soloTotal+'. Ещё раз за руль!';}
+  document.getElementById('resEmoji').textContent=e;
+  document.getElementById('resTitle').textContent=t;
+  document.getElementById('resStars').textContent=s;
+  document.getElementById('resScore').textContent=m;
+  if(pct>=70){confetti();playWin();}else tone(300,.5,'triangle',.13);
+  setTimeout(()=>showScreen('results'),500);
+}
+
+// ===== DUO =====
+// Each player has their own independent state
+let p1={q:{},opts:[],score:0,locked:false};
+let p2={q:{},opts:[],score:0,locked:false};
+const DUO_WIN=10;
+const P1_COLORS=['p1-b0','p1-b1','p1-b2','p1-b3'];
+const P2_COLORS=['p2-b0','p2-b1','p2-b2','p2-b3'];
+
+function startDuo(){
+  p1Locked=false; p2Locked=false;
+  playClick();currentMode='duo';
+  p1={q:{},opts:[],score:0,locked:false};
+  p2={q:{},opts:[],score:0,locked:false};
+  document.getElementById('d1Score').textContent='0 ✅';
+  document.getElementById('d2Score').textContent='0 ✅';
+  document.getElementById('ds1').textContent='0';
+  document.getElementById('ds2').textContent='0';
+  moveCar('car1','speed1',0);moveCar('car2','speed2',0);document.getElementById('car1').style.transform='translateY(-55%) scaleX(-1)';document.getElementById('car2').style.transform='translateY(-55%) scaleX(-1)';
+  document.getElementById('dash1').classList.remove('stopped');
+  document.getElementById('dash2').classList.remove('stopped');
+  showScreen('duoScreen');startBg();
+  newPlayerQ(1);newPlayerQ(2);
+}
+
+function newPlayerQ(pl){
+  const state=pl===1?p1:p2;
+  state.q=genQ();state.opts=genOpts(state.q.ans);state.locked=false;
+  renderPlayerQ(pl);
+}
+
+function renderPlayerQ(pl){
+  const state=pl===1?p1:p2;
+  const colors=pl===1?P1_COLORS:P2_COLORS;
+  const qEl=document.getElementById('p'+pl+'Q');
+  qEl.style.animation='none';void qEl.offsetWidth;qEl.style.animation='qPop 0.3s ease';
+  qEl.textContent=state.q.expr+'=?';
+  const optsEl=document.getElementById('p'+pl+'Opts');
+  optsEl.innerHTML='';
+  state.opts.forEach((val,i)=>{
+    const btn=document.createElement('button');
+    btn.className=`dp-btn ${colors[i]}`;
+    btn.textContent=val;
+    btn.onclick=()=>duoAns(pl,val,btn,state);
+    optsEl.appendChild(btn);
   });
 }
 
-function beep(type){
-  try{
-    const ctx=new(window.AudioContext||window.webkitAudioContext)();
-    const o=ctx.createOscillator(),g=ctx.createGain();
-    o.connect(g);g.connect(ctx.destination);
-    if(type==='correct'){
-      o.type='sine';[523,659,784,1047].forEach((f,i)=>o.frequency.setValueAtTime(f,ctx.currentTime+i*.13));
-      g.gain.setValueAtTime(.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.8);
-      o.start();o.stop(ctx.currentTime+.85);
-    } else if(type==='wrong'){
-      o.type='square';o.frequency.setValueAtTime(200,ctx.currentTime);o.frequency.setValueAtTime(140,ctx.currentTime+.18);
-      g.gain.setValueAtTime(.25,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);
-      o.start();o.stop(ctx.currentTime+.5);
-    } else if(type==='train'){
-      o.type='sawtooth';[120,100,120].forEach((f,i)=>o.frequency.setValueAtTime(f,ctx.currentTime+i*.1));
-      g.gain.setValueAtTime(.2,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);
-      o.start();o.stop(ctx.currentTime+.5);
-    } else if(type==='levelup'){
-      o.type='sine';[392,494,587,784].forEach((f,i)=>o.frequency.setValueAtTime(f,ctx.currentTime+i*.1));
-      g.gain.setValueAtTime(.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.7);
-      o.start();o.stop(ctx.currentTime+.75);
-    }
-  }catch(e){}
-}
-
-function spawnConfetti(){
-  const game=document.getElementById('game');
-  const colors=['#FF5252','#FFD600','#69F0AE','#40C4FF','#EA80FC','#FF6D00'];
-  for(let i=0;i<22;i++){
-    const c=document.createElement('div');c.className='confetti-piece';
-    const sz=8+Math.random()*8;
-    c.style.cssText=`left:${15+Math.random()*70}%;top:${10+Math.random()*20}%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${sz}px;height:${sz}px;animation-delay:${Math.random()*.4}s;animation-duration:${.9+Math.random()*.6}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
-    game.appendChild(c);setTimeout(()=>c.remove(),2000);
-  }
-}
-
-function updateHearts(){
-  const h=['❤️','❤️','❤️'];
-  for(let i=hearts;i<3;i++)h[i]='🖤';
-  document.getElementById('lives').textContent=h.join('');
-}
-
-function pick(action){
-  if(locked)return;locked=true;
-  const q=pool[qi];
-  const good=action===q.a;
-  const idx=wOrder.indexOf(action);
-  const rightIdx=wOrder.indexOf(q.a);
-
-  if(good){
-    score+=10;
-    beep('train');
-    // Move so chosen wagon is centred
-    moveToWagon(idx,()=>{
-      beep('correct');spawnConfetti();
-      document.getElementById(wMap[action]).classList.add('correct-highlight');
-      const fb=document.getElementById('feedback');fb.textContent='🎉';fb.classList.add('show');
-      setTimeout(()=>{
-        fb.classList.remove('show');
-        qi++;
-        // depart right, then arrive from left for next question
-        departToRight(()=>{ arriveFromLeft(); setTimeout(nextQ,400); });
-      },1100);
-    });
+function duoAns(pl,chosen,btn,state){
+  if(state.locked)return;
+  if(chosen===state.q.ans){
+    state.locked=true;
+    btn.classList.add('correct-flash');
+    state.score++;
+    if(!state.steps) state.steps=0;
+    state.steps++;
+    document.getElementById('d'+pl+'Score').textContent=state.score+' ✅';
+    document.getElementById('ds'+pl).textContent=state.score;
+    moveCar('car'+pl,'speed'+pl,state.steps/DUO_WIN);
+    playOk();
+    // disable all buttons for this player briefly
+    document.getElementById('p'+pl+'Opts').querySelectorAll('.dp-btn').forEach(b=>b.disabled=true);
+    if(state.score>=DUO_WIN){setTimeout(()=>endDuo(pl),700);return;}
+    setTimeout(()=>newPlayerQ(pl),900);
   } else {
-    hearts--;updateHearts();beep('wrong');
-    document.getElementById(wMap[action]).classList.add('shake-it');
-    document.getElementById(wMap[action]).style.opacity='.35';
-    document.getElementById(wMap[q.a]).classList.add('correct-highlight');
-    const fb=document.getElementById('feedback');fb.textContent='😅';fb.classList.add('show');
-    setTimeout(()=>{
-      beep('train');
-      // move to correct wagon to show it
-      moveToWagon(rightIdx,()=>{
-        setTimeout(()=>{
-          fb.classList.remove('show');
-          if(hearts<=0){showResult();return}
-          qi++;
-          departToRight(()=>{ arriveFromLeft(); setTimeout(nextQ,400); });
-        },800);
-      });
-    },600);
+    btn.classList.add('wrong-flash');playNo();
+    // Car goes BACK one step
+    state.steps=Math.max(0,(state.steps||state.score)-1);
+    moveCar('car'+pl,'speed'+pl,state.steps/DUO_WIN);
+    const car=document.getElementById('car'+pl);
+    car.classList.remove('go-back');void car.offsetWidth;car.classList.add('go-back');
+    setTimeout(()=>car.classList.remove('go-back'),600);
+    setTimeout(()=>btn.classList.remove('wrong-flash'),380);
   }
-  document.getElementById('score').textContent=score;
 }
 
-function showResult(){
-  const pct=score/(total*10);
-  const emoji=pct>=.9?'🏆':pct>=.7?'🌟':pct>=.5?'😊':'💪';
-  const msg=pct>=.9?'Ты чемпион!':pct>=.7?'Отлично!':pct>=.5?'Хорошо, молодец!':'Тренируйся ещё!';
-  beep('levelup');spawnConfetti();spawnConfetti();
-  const d=document.createElement('div');d.className='result';
-  d.innerHTML=`<div style="font-size:80px">${emoji}</div>
-    <h2>${msg}</h2>
-    <p>Правильно: ${Math.round(score/10)} из ${total}</p>
-    <div class="pts">⭐ ${score} очков</div>
-    <div style="font-size:18px">${hearts>0?'❤️'.repeat(hearts)+' жизней осталось':'Жизни кончились'}</div>
-    <button class="btn-again" onclick="restart()">🚂 Играть снова!</button>`;
-  document.getElementById('game').appendChild(d);
+function endDuo(winner){
+  stopBg();confetti();playWin();
+  document.getElementById('dash1').classList.add('stopped');
+  document.getElementById('dash2').classList.add('stopped');
+  document.getElementById('wEmoji').textContent=winner===1?'🚗':'🚙';
+  document.getElementById('wTitle').textContent='Победил Игрок '+winner+'! 🏆';
+  document.getElementById('wSub').textContent='Счёт: 🚗'+p1.score+' — '+p2.score+' 🚙';
+  document.getElementById('winnerOverlay').classList.add('show');
 }
 
-function restart(){
-  document.querySelector('.result')?.remove();
-  document.querySelectorAll('.star-sky').forEach(s=>s.remove());
-  qi=0;score=0;hearts=3;locked=false;
-  pool=shuffle(qs).slice(0,total);
-  document.getElementById('score').textContent=0;
-  updateHearts();
-  arriveFromLeft();
-  setTimeout(nextQ,1200);
+function closeWinner(){document.getElementById('winnerOverlay').classList.remove('show');}
+
+function playAgain(){
+  closeWinner();
+  if(currentMode==='solo')startSolo();else startDuo();
 }
 
-// START
-pool=shuffle(qs).slice(0,total);
-// Place train off-screen left immediately (no flash)
-const tw=document.getElementById('trainWrap');
-tw.style.left=(-TRAIN_W-20)+'px';
-// Wait for layout, then animate in to centre
-setTimeout(()=>{ arriveFromLeft(); setTimeout(nextQ,1200); },100);
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+
+// Default selection
+document.querySelector('.tbl-btn').classList.add('selected');
+window.addEventListener('click',()=>{if(!audioCtx){getCtx();if(musicOn)startBg();}},{once:true});
+
+// ===== TOUCH PROTECTION =====
+// Блокируем масштабирование двумя пальцами
+document.addEventListener("touchstart", function(e){
+  if(e.touches.length > 1) e.preventDefault();
+},{passive:false});
+document.addEventListener("touchmove", function(e){
+  if(e.touches.length > 1) e.preventDefault();
+},{passive:false});
+// Блокируем двойной тап
+var lastTap=0;
+document.addEventListener("touchend", function(e){
+  var now=Date.now();
+  if(now-lastTap < 350) e.preventDefault();
+  lastTap=now;
+},{passive:false});
+// Для дуо-кнопок: реакция на touchstart а не click
+function addTouchBtn(el, fn){
+  var fired=false;
+  el.addEventListener("touchstart", function(e){
+    e.stopPropagation();
+    if(!fired){ fired=true; fn(); }
+    setTimeout(function(){ fired=false; }, 400);
+  },{passive:false});
+  el.addEventListener("click", function(e){
+    e.stopPropagation();
+    if(!fired){ fired=true; fn(); }
+    setTimeout(function(){ fired=false; }, 400);
+  });
+}
 </script>
+</body>
+</html>
