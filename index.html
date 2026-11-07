@@ -1,0 +1,409 @@
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+@keyframes cloudDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(16px)}}
+@keyframes cloudDrift2{0%,100%{transform:translateX(0)}50%{transform:translateX(-18px)}}
+@keyframes smokeRise{0%{transform:translateY(0) scale(.5);opacity:.8}100%{transform:translateY(-45px) scale(2);opacity:0}}
+@keyframes wheelSpin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
+@keyframes fallDown{from{transform:translateX(-50%) translateY(-90px);opacity:0}to{transform:translateX(-50%) translateY(0);opacity:1}}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-10px)}75%{transform:translateX(10px)}}
+@keyframes confettiFall{0%{transform:translateY(-20px) rotate(0deg);opacity:1}100%{transform:translateY(200px) rotate(720deg);opacity:0}}
+@keyframes starPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+@keyframes glow{0%,100%{box-shadow:0 0 0 4px #4CAF50}50%{box-shadow:0 0 0 8px #4CAF50,0 0 20px #4CAF5099}}
+@keyframes bob{0%,100%{transform:translateY(0px)}50%{transform:translateY(-4px)}}
+
+#game{
+  font-family:'Comic Sans MS','Segoe UI Rounded','Segoe UI',sans-serif;
+  height:620px;position:relative;overflow:hidden;border-radius:16px;
+  background:linear-gradient(180deg,#4FC3F7 0%,#81D4FA 30%,#B3E5FC 50%,#C8E6C9 65%,#8BC34A 78%,#558B2F 100%);
+  transition:background 2s;
+}
+.sun{position:absolute;top:22px;right:50px;width:62px;height:62px;border-radius:50%;background:#FFD600;box-shadow:0 0 0 12px #FFE08255,0 0 0 24px #FFE08222;transition:background 2s,box-shadow 2s,opacity 1.5s;z-index:2}
+.moon{position:absolute;top:22px;right:50px;width:62px;height:62px;border-radius:50%;background:#E8E8E8;opacity:0;transition:opacity 1.5s;z-index:2}
+.cloud{position:absolute;background:white;border-radius:60px;transition:background 2s,opacity 1.5s}
+.cl1{width:95px;height:36px;top:30px;left:6%;animation:cloudDrift 8s ease-in-out infinite}
+.cl1::before{content:'';position:absolute;width:50px;height:50px;background:inherit;border-radius:50%;top:-22px;left:14px}
+.cl1::after{content:'';position:absolute;width:34px;height:34px;background:inherit;border-radius:50%;top:-14px;left:50px}
+.cl2{width:78px;height:30px;top:62px;left:38%;animation:cloudDrift2 10s ease-in-out infinite}
+.cl2::before{content:'';position:absolute;width:40px;height:40px;background:inherit;border-radius:50%;top:-18px;left:12px}
+.cl3{width:88px;height:33px;top:22px;left:62%;animation:cloudDrift 12s ease-in-out infinite 2s}
+.cl3::before{content:'';position:absolute;width:44px;height:44px;background:inherit;border-radius:50%;top:-20px;left:16px}
+.cl3::after{content:'';position:absolute;width:30px;height:30px;background:inherit;border-radius:50%;top:-12px;left:48px}
+
+.ground{position:absolute;bottom:0;left:0;right:0;height:27%;background:linear-gradient(180deg,#8BC34A,#558B2F);border-radius:0 0 16px 16px;transition:background 2s}
+.tracks{position:absolute;bottom:26.5%;left:0;right:0;height:14px;background:#5D4037}
+.rail{position:absolute;height:4px;left:0;right:0;background:#3E2723}
+.r1{top:2px}.r2{bottom:2px}
+
+#qbubble{
+  position:absolute;top:62px;left:50%;transform:translateX(-50%);
+  background:white;border-radius:28px;padding:18px 34px 20px;
+  box-shadow:0 10px 40px rgba(0,0,0,.2);border:3px solid #81D4FA;
+  text-align:center;z-index:10;min-width:270px;max-width:86%;
+  animation:fallDown .7s cubic-bezier(.17,.67,.38,1.2) forwards;
+}
+#qbubble::after{content:'';position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:13px solid transparent;border-right:13px solid transparent;border-top:22px solid white}
+#qtext{font-size:28px;font-weight:900;color:#1A237E;line-height:1.2;display:block}
+
+.hud-top{position:absolute;top:14px;left:0;right:0;display:flex;justify-content:space-between;align-items:center;padding:0 16px;z-index:15;pointer-events:none}
+.lives{font-size:22px}
+.score-box{background:#FFD600;border-radius:50px;padding:5px 16px;font-size:16px;font-weight:800;color:#333;box-shadow:0 3px 12px rgba(0,0,0,.2)}
+.prog-box{position:absolute;bottom:6%;left:50%;transform:translateX(-50%);color:white;font-size:13px;font-weight:800;text-shadow:0 1px 4px rgba(0,0,0,.5);z-index:10;white-space:nowrap}
+
+/* THE TRAIN — absolutely positioned, moves via JS left */
+#trainWrap{
+  position:absolute;
+  bottom:27%;
+  display:flex;align-items:flex-end;gap:8px;padding:0;
+  z-index:5;
+  will-change:left;
+}
+
+.loco{width:90px;height:74px;background:#D32F2F;border-radius:14px 20px 4px 4px;position:relative;flex-shrink:0}
+.chimney{position:absolute;top:-28px;left:14px;width:20px;height:28px;background:#B71C1C;border-radius:5px 5px 0 0}
+.smoke{position:absolute;top:-10px;left:2px;width:17px;height:17px;background:rgba(210,210,210,.85);border-radius:50%;animation:smokeRise 1.7s ease-out infinite}
+.smoke2{animation-delay:.7s;width:13px;height:13px;top:-6px;left:5px}
+.cab{position:absolute;top:9px;left:16px;width:26px;height:22px;background:#81D4FA;border-radius:4px;border:2px solid white}
+.headlight{position:absolute;right:-11px;top:46%;width:17px;height:17px;background:#FFD600;border-radius:50%;box-shadow:0 0 10px #FFD600}
+.lbody{position:absolute;bottom:13px;left:0;right:0;height:16px;background:#C62828;border-radius:4px}
+.lw{position:absolute;bottom:-13px;width:24px;height:24px;background:#3E2723;border-radius:50%;border:3px solid #795548;animation:wheelSpin .7s linear infinite}
+.lw1{left:6px}.lw2{right:6px}
+.lw-s{position:absolute;inset:2px;border-radius:50%;border:2px solid #795548}
+
+.wagon{
+  width:128px;height:68px;border-radius:10px 10px 4px 4px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  cursor:pointer;position:relative;border-bottom:4px solid rgba(0,0,0,.2);
+  gap:2px;flex-shrink:0;
+  transition:opacity .3s,box-shadow .2s;
+  box-shadow:0 5px 14px rgba(0,0,0,.25);
+}
+.wagon:hover{filter:brightness(1.12);transform:translateY(-6px)}
+.wg-plus{background:linear-gradient(145deg,#2E7D32,#4CAF50)}
+.wg-minus{background:linear-gradient(145deg,#B71C1C,#EF5350)}
+.wg-times{background:linear-gradient(145deg,#1565C0,#42A5F5)}
+.wg-divide{background:linear-gradient(145deg,#E65100,#FF9800)}
+.wsign{font-size:32px;font-weight:900;color:white;line-height:1;text-shadow:0 3px 8px rgba(0,0,0,.3)}
+.wlabel{font-size:10px;color:rgba(255,255,255,.95);font-weight:800;text-align:center;line-height:1.2;text-shadow:0 1px 4px rgba(0,0,0,.4)}
+.ww{position:absolute;bottom:-13px;width:20px;height:20px;background:#3E2723;border-radius:50%;border:3px solid #5D4037}
+.ww1{left:9px}.ww2{right:9px}
+.coupler{position:absolute;right:-12px;top:50%;transform:translateY(-50%);width:12px;height:5px;background:#888;border-radius:0 3px 3px 0;z-index:2}
+
+#feedback{position:absolute;top:32%;left:50%;transform:translateX(-50%) scale(0);font-size:68px;z-index:20;pointer-events:none;transition:transform .35s cubic-bezier(.17,.67,.38,1.5)}
+#feedback.show{transform:translateX(-50%) scale(1)}
+
+.confetti-piece{position:absolute;z-index:25;pointer-events:none;animation:confettiFall 1.2s ease-in forwards}
+.star-sky{position:absolute;border-radius:50%;background:white;opacity:0;transition:opacity 1.5s}
+
+.result{position:absolute;inset:0;background:rgba(255,255,255,.96);border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:13px;z-index:30}
+.result h2{font-size:30px;color:#2E7D32}
+.result p{font-size:19px;color:#555}
+.result .pts{font-size:28px;color:#FF9800;font-weight:800}
+.btn-again{background:#4CAF50;color:white;border:none;border-radius:50px;padding:13px 38px;font-size:18px;font-weight:800;cursor:pointer;font-family:inherit;box-shadow:0 4px 18px rgba(76,175,80,.45);margin-top:4px}
+.btn-again:hover{background:#388E3C}
+.correct-highlight{animation:glow .6s ease infinite;transform:translateY(-10px) scale(1.08)!important}
+.shake-it{animation:shake .4s ease!important}
+</style>
+
+<div id="game">
+  <div class="sun" id="sun"></div>
+  <div class="moon" id="moon"></div>
+  <div class="cloud cl1" id="cl1"></div>
+  <div class="cloud cl2" id="cl2"></div>
+  <div class="cloud cl3" id="cl3"></div>
+  <div class="hud-top">
+    <div class="lives" id="lives">❤️❤️❤️</div>
+    <div class="score-box">⭐ <span id="score">0</span></div>
+  </div>
+  <div id="qbubble"><span id="qtext">Загрузка...</span></div>
+  <div class="ground" id="ground">
+    <div class="tracks"><div class="rail r1"></div><div class="rail r2"></div></div>
+  </div>
+  <div id="trainWrap">
+    <div class="loco">
+      <div class="chimney"><div class="smoke"></div><div class="smoke smoke2"></div></div>
+      <div class="cab"></div><div class="headlight"></div><div class="lbody"></div>
+      <div class="lw lw1"><div class="lw-s"></div></div>
+      <div class="lw lw2"><div class="lw-s"></div></div>
+    </div>
+    <div class="wagon wg-plus" id="wPlus" onclick="pick('plus')">
+      <div class="wsign">+</div><div class="wlabel">ПРИБАВИТЬ<br>на … больше</div>
+      <div class="ww ww1"></div><div class="ww ww2"></div><div class="coupler"></div>
+    </div>
+    <div class="wagon wg-minus" id="wMinus" onclick="pick('minus')">
+      <div class="wsign">−</div><div class="wlabel">ОТНЯТЬ<br>на … меньше</div>
+      <div class="ww ww1"></div><div class="ww ww2"></div><div class="coupler"></div>
+    </div>
+    <div class="wagon wg-times" id="wTimes" onclick="pick('times')">
+      <div class="wsign">×</div><div class="wlabel">УМНОЖИТЬ<br>в … раз больше</div>
+      <div class="ww ww1"></div><div class="ww ww2"></div><div class="coupler"></div>
+    </div>
+    <div class="wagon wg-divide" id="wDivide" onclick="pick('divide')">
+      <div class="wsign">÷</div><div class="wlabel">ДЕЛИТЬ<br>в … раз меньше</div>
+      <div class="ww ww1"></div><div class="ww ww2"></div>
+    </div>
+  </div>
+  <div id="feedback"></div>
+  <div class="prog-box" id="progress"></div>
+</div>
+
+<script>
+const qs=[
+  {t:"Увеличь В 4 РАЗА",a:"times"},{t:"В 7 РАЗ БОЛЬШЕ",a:"times"},
+  {t:"Увеличить В 3 РАЗА",a:"times"},{t:"Стало В 5 РАЗ БОЛЬШЕ",a:"times"},
+  {t:"В 9 РАЗ БОЛЬШЕ",a:"times"},{t:"Увеличить В 6 РАЗ",a:"times"},
+  {t:"В 2 РАЗА БОЛЬШЕ",a:"times"},
+  {t:"Уменьши В 6 РАЗ",a:"divide"},{t:"В 4 РАЗА МЕНЬШЕ",a:"divide"},
+  {t:"Уменьшить В 3 РАЗА",a:"divide"},{t:"Стало В 5 РАЗ МЕНЬШЕ",a:"divide"},
+  {t:"Уменьши В 2 РАЗА",a:"divide"},{t:"В 8 РАЗ МЕНЬШЕ",a:"divide"},
+  {t:"Уменьшить В 7 РАЗ",a:"divide"},
+  {t:"На 5 БОЛЬШЕ",a:"plus"},{t:"Прибавь 8",a:"plus"},
+  {t:"Увеличь НА 3",a:"plus"},{t:"НА 6 БОЛЬШЕ",a:"plus"},
+  {t:"Прибавить НА 10",a:"plus"},{t:"НА 4 БОЛЬШЕ",a:"plus"},
+  {t:"На 3 МЕНЬШЕ",a:"minus"},{t:"Отними 9",a:"minus"},
+  {t:"Уменьши НА 5",a:"minus"},{t:"НА 2 МЕНЬШЕ",a:"minus"},
+  {t:"Отнять НА 6",a:"minus"},{t:"НА 7 МЕНЬШЕ",a:"minus"},
+  {t:"Уменьшить НА 4",a:"minus"},
+];
+
+const wMap={plus:'wPlus',minus:'wMinus',times:'wTimes',divide:'wDivide'};
+const wOrder=['plus','minus','times','divide'];
+let pool=[],qi=0,score=0,hearts=3,total=12,locked=false;
+let bobTimer=null;
+
+function shuffle(a){return[...a].sort(()=>Math.random()-.5)}
+
+// Train dimensions: loco=90, gap=8, wagon=128, gap=8 repeated
+// Offsets of wagon centres from trainWrap left edge:
+// wagon[i] centre = 90 + 8 + i*(128+8) + 64
+function wagonCentreOffset(idx){ return 90+8+idx*136+64; }
+
+// Total train width
+const TRAIN_W = 90+8+4*128+3*8; // 650px
+
+function gameWidth(){ return document.getElementById('game').clientWidth; }
+
+// left value so train centre (325) sits at game centre
+function centreLeft(){ return gameWidth()/2 - TRAIN_W/2; }
+
+// left value so wagon[idx] centre sits at game centre
+function wagonLeft(idx){ return gameWidth()/2 - wagonCentreOffset(idx); }
+
+function setTrainLeft(px, animate, duration){
+  const tw = document.getElementById('trainWrap');
+  tw.style.transition = animate ? `left ${duration||0.95}s cubic-bezier(.4,0,.2,1)` : 'none';
+  tw.style.left = px+'px';
+}
+
+function startBob(){
+  stopBob();
+  const tw=document.getElementById('trainWrap');
+  tw.style.animation='bob 2s ease-in-out infinite';
+}
+function stopBob(){
+  const tw=document.getElementById('trainWrap');
+  tw.style.animation='none';
+}
+
+function placeCentre(animate){
+  setTrainLeft(centreLeft(), animate, 1.1);
+}
+
+function arriveFromLeft(){
+  // instantly place off-screen left, then animate to centre
+  setTrainLeft(-TRAIN_W-20, false);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{
+    setTrainLeft(centreLeft(), true, 1.1);
+    setTimeout(startBob, 1150);
+  }));
+}
+
+function departToRight(cb){
+  stopBob();
+  setTrainLeft(gameWidth()+20, true, 0.9);
+  setTimeout(cb, 950);
+}
+
+function moveToWagon(idx, cb){
+  stopBob();
+  setTrainLeft(wagonLeft(idx), true, 0.9);
+  setTimeout(cb, 960);
+}
+
+// --- SKY ---
+function updateSky(q){
+  const game=document.getElementById('game');
+  const sun=document.getElementById('sun');
+  const moon=document.getElementById('moon');
+  const clouds=[document.getElementById('cl1'),document.getElementById('cl2'),document.getElementById('cl3')];
+  const ground=document.getElementById('ground');
+  const phase=Math.floor(q/4);
+  if(phase===0){
+    game.style.background='linear-gradient(180deg,#4FC3F7 0%,#81D4FA 30%,#B3E5FC 50%,#C8E6C9 65%,#8BC34A 78%,#558B2F 100%)';
+    sun.style.background='#FFD600';sun.style.boxShadow='0 0 0 12px #FFE08255,0 0 0 24px #FFE08222';sun.style.opacity='1';
+    moon.style.opacity='0';clouds.forEach(c=>{c.style.background='white';c.style.opacity='.92'});
+    ground.style.background='linear-gradient(180deg,#8BC34A,#558B2F)';
+  } else if(phase===1){
+    game.style.background='linear-gradient(180deg,#FF8C00 0%,#FFB347 20%,#FF6B6B 40%,#C8A07A 60%,#8B7355 78%,#5D4E37 100%)';
+    sun.style.background='#FF4500';sun.style.boxShadow='0 0 0 12px #FF450044,0 0 0 24px #FF450022';sun.style.opacity='1';
+    moon.style.opacity='0';clouds.forEach(c=>{c.style.background='#FFD4A0';c.style.opacity='.8'});
+    ground.style.background='linear-gradient(180deg,#8B7355,#5D4E37)';
+  } else {
+    game.style.background='linear-gradient(180deg,#0D1B2A 0%,#1B2A4A 30%,#2C3E6A 50%,#1A3A2A 65%,#1A3A1A 78%,#0D200D 100%)';
+    sun.style.opacity='0';moon.style.opacity='1';
+    clouds.forEach(c=>{c.style.background='#334';c.style.opacity='.35'});
+    ground.style.background='linear-gradient(180deg,#1A3A1A,#0D200D)';
+    addStars();
+  }
+}
+
+function addStars(){
+  const game=document.getElementById('game');
+  if(game.querySelectorAll('.star-sky').length>0)return;
+  for(let i=0;i<18;i++){
+    const s=document.createElement('div');s.className='star-sky';
+    const sz=2+Math.random()*3;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*50}%;left:${Math.random()*100}%;animation:starPulse ${1+Math.random()*2}s ease-in-out ${Math.random()*2}s infinite`;
+    game.appendChild(s);
+    setTimeout(()=>s.style.opacity=String(.4+Math.random()*.6),100);
+  }
+}
+
+function nextQ(){
+  if(qi>=total||hearts<=0){showResult();return}
+  updateSky(qi);
+  const q=pool[qi];
+  const b=document.getElementById('qbubble');
+  b.style.animation='none';void b.offsetWidth;
+  b.style.animation='fallDown .7s cubic-bezier(.17,.67,.38,1.2) forwards';
+  document.getElementById('qtext').textContent=q.t;
+  document.getElementById('progress').textContent='Вопрос '+(qi+1)+' из '+total;
+  locked=false;
+  Object.values(wMap).forEach(id=>{
+    const el=document.getElementById(id);
+    el.style.opacity='1';el.style.pointerEvents='auto';
+    el.classList.remove('correct-highlight','shake-it');
+    el.style.transform='';el.style.boxShadow='';
+  });
+}
+
+function beep(type){
+  try{
+    const ctx=new(window.AudioContext||window.webkitAudioContext)();
+    const o=ctx.createOscillator(),g=ctx.createGain();
+    o.connect(g);g.connect(ctx.destination);
+    if(type==='correct'){
+      o.type='sine';[523,659,784,1047].forEach((f,i)=>o.frequency.setValueAtTime(f,ctx.currentTime+i*.13));
+      g.gain.setValueAtTime(.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.8);
+      o.start();o.stop(ctx.currentTime+.85);
+    } else if(type==='wrong'){
+      o.type='square';o.frequency.setValueAtTime(200,ctx.currentTime);o.frequency.setValueAtTime(140,ctx.currentTime+.18);
+      g.gain.setValueAtTime(.25,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);
+      o.start();o.stop(ctx.currentTime+.5);
+    } else if(type==='train'){
+      o.type='sawtooth';[120,100,120].forEach((f,i)=>o.frequency.setValueAtTime(f,ctx.currentTime+i*.1));
+      g.gain.setValueAtTime(.2,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.45);
+      o.start();o.stop(ctx.currentTime+.5);
+    } else if(type==='levelup'){
+      o.type='sine';[392,494,587,784].forEach((f,i)=>o.frequency.setValueAtTime(f,ctx.currentTime+i*.1));
+      g.gain.setValueAtTime(.3,ctx.currentTime);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.7);
+      o.start();o.stop(ctx.currentTime+.75);
+    }
+  }catch(e){}
+}
+
+function spawnConfetti(){
+  const game=document.getElementById('game');
+  const colors=['#FF5252','#FFD600','#69F0AE','#40C4FF','#EA80FC','#FF6D00'];
+  for(let i=0;i<22;i++){
+    const c=document.createElement('div');c.className='confetti-piece';
+    const sz=8+Math.random()*8;
+    c.style.cssText=`left:${15+Math.random()*70}%;top:${10+Math.random()*20}%;background:${colors[Math.floor(Math.random()*colors.length)]};width:${sz}px;height:${sz}px;animation-delay:${Math.random()*.4}s;animation-duration:${.9+Math.random()*.6}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    game.appendChild(c);setTimeout(()=>c.remove(),2000);
+  }
+}
+
+function updateHearts(){
+  const h=['❤️','❤️','❤️'];
+  for(let i=hearts;i<3;i++)h[i]='🖤';
+  document.getElementById('lives').textContent=h.join('');
+}
+
+function pick(action){
+  if(locked)return;locked=true;
+  const q=pool[qi];
+  const good=action===q.a;
+  const idx=wOrder.indexOf(action);
+  const rightIdx=wOrder.indexOf(q.a);
+
+  if(good){
+    score+=10;
+    beep('train');
+    // Move so chosen wagon is centred
+    moveToWagon(idx,()=>{
+      beep('correct');spawnConfetti();
+      document.getElementById(wMap[action]).classList.add('correct-highlight');
+      const fb=document.getElementById('feedback');fb.textContent='🎉';fb.classList.add('show');
+      setTimeout(()=>{
+        fb.classList.remove('show');
+        qi++;
+        // depart right, then arrive from left for next question
+        departToRight(()=>{ arriveFromLeft(); setTimeout(nextQ,400); });
+      },1100);
+    });
+  } else {
+    hearts--;updateHearts();beep('wrong');
+    document.getElementById(wMap[action]).classList.add('shake-it');
+    document.getElementById(wMap[action]).style.opacity='.35';
+    document.getElementById(wMap[q.a]).classList.add('correct-highlight');
+    const fb=document.getElementById('feedback');fb.textContent='😅';fb.classList.add('show');
+    setTimeout(()=>{
+      beep('train');
+      // move to correct wagon to show it
+      moveToWagon(rightIdx,()=>{
+        setTimeout(()=>{
+          fb.classList.remove('show');
+          if(hearts<=0){showResult();return}
+          qi++;
+          departToRight(()=>{ arriveFromLeft(); setTimeout(nextQ,400); });
+        },800);
+      });
+    },600);
+  }
+  document.getElementById('score').textContent=score;
+}
+
+function showResult(){
+  const pct=score/(total*10);
+  const emoji=pct>=.9?'🏆':pct>=.7?'🌟':pct>=.5?'😊':'💪';
+  const msg=pct>=.9?'Ты чемпион!':pct>=.7?'Отлично!':pct>=.5?'Хорошо, молодец!':'Тренируйся ещё!';
+  beep('levelup');spawnConfetti();spawnConfetti();
+  const d=document.createElement('div');d.className='result';
+  d.innerHTML=`<div style="font-size:80px">${emoji}</div>
+    <h2>${msg}</h2>
+    <p>Правильно: ${Math.round(score/10)} из ${total}</p>
+    <div class="pts">⭐ ${score} очков</div>
+    <div style="font-size:18px">${hearts>0?'❤️'.repeat(hearts)+' жизней осталось':'Жизни кончились'}</div>
+    <button class="btn-again" onclick="restart()">🚂 Играть снова!</button>`;
+  document.getElementById('game').appendChild(d);
+}
+
+function restart(){
+  document.querySelector('.result')?.remove();
+  document.querySelectorAll('.star-sky').forEach(s=>s.remove());
+  qi=0;score=0;hearts=3;locked=false;
+  pool=shuffle(qs).slice(0,total);
+  document.getElementById('score').textContent=0;
+  updateHearts();
+  arriveFromLeft();
+  setTimeout(nextQ,1200);
+}
+
+// START
+pool=shuffle(qs).slice(0,total);
+// Place train off-screen left immediately (no flash)
+const tw=document.getElementById('trainWrap');
+tw.style.left=(-TRAIN_W-20)+'px';
+// Wait for layout, then animate in to centre
+setTimeout(()=>{ arriveFromLeft(); setTimeout(nextQ,1200); },100);
+</script>
